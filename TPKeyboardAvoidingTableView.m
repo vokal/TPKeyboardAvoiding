@@ -217,13 +217,30 @@
     CGFloat offset = rect.origin.y;
     
     
+
+    if (self.style == UITableViewStylePlain) {
+        CGFloat sectionHeaderHeight = 0.0;
+        if ([self.delegate respondsToSelector:@selector(tableView:heightForHeaderInSection:)]) {
+            CGPoint cellPoint = CGPointMake(rect.origin.x, rect.origin.y + self.contentOffset.y);
+            NSIndexPath *currentCellPath = [self indexPathForRowAtPoint:cellPoint];
+            sectionHeaderHeight = [self.delegate tableView:self heightForHeaderInSection:currentCellPath.section];
+        } else {
+            //this is probably buggy because sectionHeaderHeight may be set, but not actually used
+            sectionHeaderHeight = self.sectionHeaderHeight;
+        }
+        offset = offset - sectionHeaderHeight;
+    }
+    
+
+
+    
     if ( self.contentSize.height - offset < space ) {
         // Scroll to the bottom
         offset = self.contentSize.height - space;
     } else {
         if ( view.bounds.size.height < space ) {
             // Center vertically if there's room
-            offset -= floor((space-view.bounds.size.height)/2.0);
+            offset = offset - floor((space-view.bounds.size.height)/2.0);
         }
         if ( offset + space > self.contentSize.height ) {
             // Clamp to content size
